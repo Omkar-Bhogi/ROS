@@ -7,6 +7,9 @@ around" tutorial project.
 
 Everything here is simulation — no physical robot involved.
 
+![Robot in simulated factory](images/gazebo.png)
+![Finished SLAM map](images/rviz_map.png)
+
 ## What it does right now
 
 - Simulated differential-drive robot (URDF/Xacro) with 2 wheels, a caster, and
