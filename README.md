@@ -2,10 +2,9 @@
 
 Simulated mobile robot in ROS 2 + Gazebo that maps a small factory-style
 environment using SLAM. Built to connect my robotics coursework with my actual
-production/MES background, instead of just doing a generic "robot drives
-around" tutorial project.
+production/MES background.
 
-Everything here is simulation — no physical robot involved.
+
 
 ![Robot in simulated factory](images/gazebo.png)
 ![Finished SLAM map](images/rviz_map.png)
