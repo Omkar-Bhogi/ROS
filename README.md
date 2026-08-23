@@ -1,4 +1,4 @@
-# ros2-industrial-amr
+# ROS2-industrial-amr
 
 Simulated mobile robot in ROS 2 + Gazebo that maps a small factory-style
 environment using SLAM. Built to connect my robotics coursework with my actual
@@ -50,15 +50,15 @@ map of the walls and both stations in RViz.
 ## Structure
 
 src/
-task_manager/ - basic pub/sub practice, not connected to the robot
-amr_description/
-urdf/amr.urdf.xacro - robot shape
-worlds/factory.sdf - the simulated room
-launch/slam.launch.py - starts everything
-config/slam_params.yaml
+  task_manager/ - basic pub/sub practice,
+  amr_description/
+    urdf/amr.urdf.xacro 
+    worlds/factory.sdf 
+    launch/slam.launch.py 
+    config/slam_params.yaml
 maps/
-factory_map.pgm
-factory_map.yaml
+  factory_map.pgm
+  factory_map.yaml
 
 
 ## Running it
