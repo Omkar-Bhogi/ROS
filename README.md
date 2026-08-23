@@ -88,16 +88,6 @@ ros2 run nav2_map_server map_saver_cli -f maps/factory_map
 
 Ubuntu 24.04 (WSL2), ROS 2 Jazzy, Gazebo Harmonic.
 
-## Not done yet
-
-- No autonomous navigation — right now I'm driving it manually with
-  `cmd_vel`. Nav2 is next.
-- Map coverage is from a short test drive, not the whole room.
-- No connection to MQTT/OPC UA or a database yet — that's planned once
-  navigation is working, similar to what I did in my
-  [opcua-production-monitor](https://github.com/Omkar-Bhogi/opcua-production-monitor)
-  project.
-
 ## Plan
 
 1. ~~Basic ROS 2 pub/sub~~ ✅
