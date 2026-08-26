@@ -2,6 +2,8 @@
 
 A simulated autonomous mobile robot (AMR) for industrial material handling, built with ROS 2 and Gazebo. The robot maps a factory environment via SLAM, then uses Nav2 to autonomously localize, plan paths, and navigate to goal poses while avoiding obstacles.
 
+This project models an autonomous material-handling use case commonly found in modern production environments: an AMR transporting material between defined factory stations. The project focuses on the robotics software layer—mapping, localization, navigation, obstacle avoidance, and robot-state handling—while the simulated factory environment provides a controlled manufacturing context for testing these behaviors.
+
 ## Stack
 
 - **ROS 2 Jazzy**
