@@ -76,3 +76,16 @@ Once localized, send goals via RViz's "2D Goal Pose" tool and the robot will pla
 - [ ] Multi-waypoint patrol routes (`navigate_through_poses`)
 - [ ] Performance tuning for consistent real-time control loop rates
 
+
+## Demo
+
+Autonomous navigation with obstacle avoidance — the robot localizes against the saved map, plans a path, and drives around a factory station to reach the goal.
+
+![Nav2 autonomous navigation demo](docs/media/nav2_demo.gif)
+
+**Full-quality video:** https://github.com/user-attachments/assets/9a7d368c-e586-4e7e-bc01-477d57935a84
+
+| RViz — localization, costmaps, and planned path | Gazebo — simulated factory environment |
+|---|---|
+| ![RViz view](docs/media/rviz_screenshot.png) | ![Gazebo view](docs/media/gazebo_screenshot.png) |
+
