@@ -58,11 +58,26 @@ def generate_launch_description():
         output='screen',
         parameters=[slam_params_file]
     )
+
     lidar_frame_bridge = Node(
         package='tf2_ros',
         executable='static_transform_publisher',
         arguments=['0', '0', '0', '0', '0', '0', 'lidar_link', 'amr/base_link/lidar']
     )
+
+    slam_lifecycle_manager = Node(
+        package='nav2_lifecycle_manager',
+        executable='lifecycle_manager',
+        name='lifecycle_manager_slam',
+        output='screen',
+        parameters=[{
+            'use_sim_time': True,
+            'autostart': True,
+            'node_names': ['slam_toolbox'],
+            'bond_timeout': 0.0
+        }]
+    )
+
     return LaunchDescription([
         gazebo,
         robot_state_publisher,
@@ -70,4 +85,5 @@ def generate_launch_description():
         bridge,
         slam,
         lidar_frame_bridge,
+        slam_lifecycle_manager,
     ])
