@@ -23,31 +23,32 @@ This project models an autonomous material-handling use case commonly found in m
 
 ## Architecture
                   Factory Environment
-                           │
-                           ▼
+                           |
+                           v
                     Gazebo Harmonic
-                           │
+                           |
                      ros_gz_bridge
-                           │
-                           ▼
+                           |
+                           v
                          ROS 2
-                           │
-        ┌──────────────────┼──────────────────┐
-        │                  │                  │
-        ▼                  ▼                  ▼
-   SLAM Toolbox          AMCL               Nav2
-        │                  │                  │
-        ▼                  ▼                  ▼
-   Occupancy Map      Localization       Path Planning
-                                              │
-                                              ▼
-                                       MPPI Controller
-                                              │
-                                              ▼
-                                      Differential Drive
-                                              │
-                                              ▼
-                                            AMR
+                           |
+        +------------------+------------------+
+        |                  |                  |
+        v  
+    SLAM Toolbox          AMCL               Nav2
+                       
+        |                  |                  |
+        v                  v                  v
+    Occupancy Map      Localization      Path Planning
+                                              |
+                                              v
+                                        MPPI Controller
+                                              |
+                                              v
+                                       Differential Drive
+                                              |
+                                              v
+                                             AMR
 
 ## Usage
 
