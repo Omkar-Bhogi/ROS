@@ -83,7 +83,7 @@ Autonomous navigation with obstacle avoidance — the robot localizes against th
 
 ![Nav2 autonomous navigation demo](docs/media/nav2_demo.gif)
 
-**Full-quality video:** https://github.com/user-attachments/assets/9a7d368c-e586-4e7e-bc01-477d57935a84
+**Full-quality video:** https://github.com/user-attachments/assets/d02bfbbe-9971-4de7-bac0-7034feecda44
 
 | RViz — localization, costmaps, and planned path | Gazebo — simulated factory environment |
 |---|---|
