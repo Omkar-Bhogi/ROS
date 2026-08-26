@@ -21,6 +21,34 @@ This project models an autonomous material-handling use case commonly found in m
 - Plans collision-free paths with Nav2's global/local planners and follows them autonomously via the MPPI controller
 - Automatically brings up SLAM on launch (no manual lifecycle activation required)
 
+## Architecture
+                  Factory Environment
+                           │
+                           ▼
+                    Gazebo Harmonic
+                           │
+                     ros_gz_bridge
+                           │
+                           ▼
+                         ROS 2
+                           │
+        ┌──────────────────┼──────────────────┐
+        │                  │                  │
+        ▼                  ▼                  ▼
+   SLAM Toolbox          AMCL               Nav2
+        │                  │                  │
+        ▼                  ▼                  ▼
+   Occupancy Map      Localization       Path Planning
+                                              │
+                                              ▼
+                                       MPPI Controller
+                                              │
+                                              ▼
+                                      Differential Drive
+                                              │
+                                              ▼
+                                            AMR
+
 ## Usage
 
 ### 1. Map a new environment (or skip if using the saved map)
