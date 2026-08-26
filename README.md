@@ -1,101 +1,78 @@
-# ROS2-industrial-amr
+# ROS 2 Autonomous Industrial Material-Handling Robot
 
-Simulated mobile robot in ROS 2 + Gazebo that maps a small factory-style
-environment using SLAM. Built to connect my robotics coursework with my actual
-production/MES background.
+A simulated autonomous mobile robot (AMR) for industrial material handling, built with ROS 2 and Gazebo. The robot maps a factory environment via SLAM, then uses Nav2 to autonomously localize, plan paths, and navigate to goal poses while avoiding obstacles.
 
+## Stack
 
+- **ROS 2 Jazzy**
+- **Gazebo Harmonic** (simulation, physics, sensors)
+- **SLAM Toolbox** (2D occupancy grid mapping)
+- **Nav2** (AMCL localization, path planning, MPPI-based path following)
+- **URDF/Xacro** (robot description: differential-drive chassis, 2D LiDAR)
+- **ros_gz_bridge** (ROS 2 ↔ Gazebo topic bridging)
 
-![Robot in simulated factory](images/gazebo.png)
-![Finished SLAM map](images/rviz_map.png)
+## What it does
 
-## What it does right now
+- Simulates a differential-drive robot with 2D LiDAR in a custom factory-style Gazebo world (walls, obstacle stations)
+- Builds a live occupancy grid map of the environment using SLAM Toolbox as the robot drives
+- Saves the map for reuse, then localizes against it using AMCL
+- Plans collision-free paths with Nav2's global/local planners and follows them autonomously via the MPPI controller
+- Automatically brings up SLAM on launch (no manual lifecycle activation required)
 
-- Simulated differential-drive robot (URDF/Xacro) with 2 wheels, a caster, and
-  a 2D LiDAR
-- Spawns in Gazebo Harmonic in a small factory world (4 walls + 2 station
-  obstacles)
-- Drives via `/cmd_vel`
-- Runs SLAM (slam_toolbox) to build a 2D occupancy grid map from the LiDAR
-  data as it drives around
-- Map gets saved to disk (`.pgm` + `.yaml`)
+## Usage
 
-Basically: drive it around manually, watch it build a map of the room in
-RViz2, save the map.
-
-## The annoying bug I had to fix
-
-The LiDAR was publishing real data and slam_toolbox was running, but `/map`
-just never produced anything — every scan was getting silently dropped.
-
-Took a while to track down. Turned out the LiDAR's scan messages were
-labeled with frame `amr/base_link/lidar`, but that frame didn't actually
-exist anywhere in the TF tree — only `lidar_link` did. Two different parts
-of the stack disagreed on what to call the same sensor:
-
-- `robot_state_publisher` builds the TF tree from my original URDF, so it
-  used `lidar_link` like I named it
-- Gazebo internally merges/simplifies chains of fixed joints when it loads
-  the robot (for performance), and in doing that it renamed the sensor
-  frame internally to `amr/base_link/lidar`
-
-So slam_toolbox got scan data pointing at a frame name that didn't exist,
-and just threw it all away. Once I found this (mostly by walking the TF
-tree with `tf2_echo`/`tf2_monitor` instead of guessing at slam_toolbox
-params), the fix was adding a `static_transform_publisher` bridging the two
-frame names — since they're literally the same physical point, a
-zero-distance transform is correct, not a hack.
-
-After that, `/map` started publishing real data and I could see a proper
-map of the walls and both stations in RViz.
-
-## Structure
-
-src/
-  task_manager/ - basic pub/sub practice,
-  amr_description/
-    urdf/amr.urdf.xacro 
-    worlds/factory.sdf 
-    launch/slam.launch.py 
-    config/slam_params.yaml
-maps/
-  factory_map.pgm
-  factory_map.yaml
-
-
-## Running it
+### 1. Map a new environment (or skip if using the saved map)
 
 ```bash
 ros2 launch amr_description slam.launch.py
 ```
 
-then in another terminal:
+SLAM Toolbox activates automatically. Click ▶ play in Gazebo, then drive the robot around with:
 
 ```bash
-ros2 lifecycle set /slam_toolbox configure
-ros2 lifecycle set /slam_toolbox activate
-
-# drive it
-ros2 topic pub /cmd_vel geometry_msgs/msg/Twist "{linear: {x: 0.2}, angular: {z: 0.3}}"
-
-# stop it (cmd_vel keeps repeating until you overwrite it — Ctrl+C alone doesn't stop the robot)
-ros2 topic pub /cmd_vel geometry_msgs/msg/Twist "{linear: {x: 0.0}, angular: {z: 0.0}}" -1
+ros2 run teleop_twist_keyboard teleop_twist_keyboard
 ```
 
-`rviz2` to watch the map build live. Save it with:
+Once the map looks complete in RViz, save it:
 
 ```bash
-ros2 run nav2_map_server map_saver_cli -f maps/factory_map
+ros2 run nav2_map_server map_saver_cli -f my_map
 ```
 
-Ubuntu 24.04 (WSL2), ROS 2 Jazzy, Gazebo Harmonic.
+### 2. Navigate autonomously with a saved map
 
-## Plan
+Deactivate SLAM if it's still running (it isn't needed once you have a saved map):
 
-1. ~~Basic ROS 2 pub/sub~~ ✅
-2. ~~Simulated robot in Gazebo~~ ✅
-3. ~~SLAM mapping~~ ✅
-4. Nav2 autonomous navigation — next
-5. Task manager (simulate the robot getting assigned "move part from A to B")
-6. Bridge to MQTT/OPC UA
-7. Log robot state to a database + Grafana dashboard
+```bash
+ros2 lifecycle set /slam_toolbox deactivate
+```
+
+Launch Nav2:
+
+```bash
+ros2 launch nav2_bringup bringup_launch.py use_sim_time:=true \
+  map:=$HOME/ros2-industrial-amr/my_map.yaml \
+  params_file:=$HOME/ros2-industrial-amr/src/amr_description/config/nav2_params.yaml
+```
+
+**Important:** open RViz and set an initial pose (2D Pose Estimate) within ~30 seconds of launching — the global costmap will fail to activate if it doesn't receive the `map → odom` transform in time.
+
+Once localized, send goals via RViz's "2D Goal Pose" tool and the robot will plan and drive there autonomously.
+
+## Notable problems solved
+
+- **Frame mismatch**: Nav2's default config expects a `base_footprint` frame; this robot's URDF only defines `base_link`. Fixed by updating `base_frame_id` across `nav2_params.yaml`.
+- **SLAM lifecycle**: `slam_toolbox` starts as an inactive lifecycle node by default. Added a `nav2_lifecycle_manager` node to `slam.launch.py` with `autostart: true` and `bond_timeout: 0.0` so it configures and activates itself on launch.
+- **MPPI/controller frequency coupling**: The MPPI controller's internal `model_dt` must match `1 / controller_frequency` exactly — changing one without the other causes `controller_server` to crash on configure.
+- **AMCL activation timing**: The global costmap won't activate until it receives the `map → odom` transform, which AMCL only publishes after receiving an initial pose estimate — and it gives up after ~30s if that pose isn't set in time.
+
+## Status
+
+- [x] Gazebo simulation with robot model and factory world
+- [x] ROS 2 ↔ Gazebo bridge (cmd_vel, odom, tf, scan)
+- [x] SLAM mapping with automatic lifecycle activation
+- [x] AMCL localization against a saved map
+- [x] Autonomous Nav2 navigation to goal poses with obstacle avoidance
+- [ ] Multi-waypoint patrol routes (`navigate_through_poses`)
+- [ ] Performance tuning for consistent real-time control loop rates
+
